@@ -1,0 +1,3 @@
+Bundler.setup
+
+require 'skypekit'
