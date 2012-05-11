@@ -1,0 +1,152 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Skypekit by railsware</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Skypekit</h1>
+        <p>Ruby FFI interface to libskypekit C library</p>
+        <p class="view"><a href="https://github.com/railsware/skypekit">View the Project on GitHub <small>railsware/skypekit</small></a></p>
+        <ul>
+          <li><a href="https://github.com/railsware/skypekit/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/railsware/skypekit/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/railsware/skypekit">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><img src="http://blog.railsware.com/wp-content/uploads/2012/05/skypekit.png" alt="logo"></p>
+
+<h1>Skypekit</h1>
+
+<p>Ruby FFI interface to libskypekit C library</p>
+
+<h2>Dependencies</h2>
+
+<ul>
+<li>libskypekit C library</li>
+<li>ffi gem</li>
+</ul><h2>Installation</h2>
+
+<p>Install <a href="https://github.com/railsware/libskypekit">libskypekit</a>.</p>
+
+<p>Add this line to your application's Gemfile:</p>
+
+<pre><code>gem 'skypekit'
+</code></pre>
+
+<p>And then execute:</p>
+
+<pre><code>$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre><code>$ gem install skypekit
+</code></pre>
+
+<h2>Usage</h2>
+
+<p>ping_pong example:</p>
+
+<div class="highlight">
+<pre>
+<span class="nb">require</span> <span class="s2">"skypekit"</span>
+
+<span class="vg">$skype</span> <span class="o">=</span> <span class="no">Skypekit</span><span class="o">::</span><span class="no">Skype</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:keyfile</span> <span class="o">=&gt;</span> <span class="s1">'myskypekit.pem'</span><span class="p">)</span>
+
+<span class="vg">$skype</span><span class="o">.</span><span class="n">start</span>
+<span class="vg">$skype</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="s1">'myskypename'</span><span class="p">,</span> <span class="s1">'mypassword'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">terminate</span>
+  <span class="nb">puts</span> <span class="s2">"Terminating"</span>
+  <span class="vg">$skype</span><span class="o">.</span><span class="n">stop</span>
+  <span class="nb">exit</span>
+<span class="k">end</span>
+
+<span class="nb">trap</span><span class="p">(</span><span class="s1">'INT'</span><span class="p">)</span> <span class="k">do</span>
+  <span class="n">terminate</span>
+<span class="k">end</span>
+
+<span class="kp">loop</span> <span class="k">do</span>
+  <span class="n">event</span> <span class="o">=</span> <span class="vg">$skype</span><span class="o">.</span><span class="n">get_event</span>
+
+  <span class="k">unless</span> <span class="n">event</span>
+    <span class="nb">sleep</span> <span class="mi">5</span>
+    <span class="k">next</span>
+  <span class="k">end</span>
+
+  <span class="k">case</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span>
+  <span class="k">when</span> <span class="ss">:account_status</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">logged_in?</span>
+      <span class="nb">puts</span> <span class="s2">"Congrats! We are Logged in!"</span>
+    <span class="k">end</span>
+
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">logged_out?</span>
+      <span class="nb">puts</span> <span class="s2">"Authentication failed: </span><span class="si">#{</span><span class="n">event</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span>
+      <span class="n">terminate</span>
+    <span class="k">end</span>
+
+  <span class="k">when</span> <span class="ss">:chat_message</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">data</span>
+
+    <span class="nb">puts</span> <span class="s2">"@"</span> <span class="o">*</span> <span class="mi">80</span>
+    <span class="nb">p</span> <span class="n">message</span>
+    <span class="nb">puts</span> <span class="s2">"@"</span> <span class="o">*</span> <span class="mi">80</span>
+
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">body</span> <span class="o">==</span> <span class="s2">"ping"</span>
+      <span class="vg">$skype</span><span class="o">.</span><span class="n">send_chat_message</span><span class="p">(</span><span class="n">message</span><span class="o">.</span><span class="n">convo_id</span><span class="p">,</span> <span class="s2">"pong"</span><span class="p">)</span>
+    <span class="k">end</span>
+
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre>
+</div>
+
+
+<p>Run ping_pong example:</p>
+
+<pre><code>SK_KEY=bla.pem SK_USER=user SK_PASS=secret be ruby examples/ping_pong.rb
+</code></pre>
+
+<h2>Author</h2>
+
+<ul>
+<li>Andriy Yanko</li>
+</ul><h2>Contributors</h2>
+
+<ul>
+<li>Volodymyr Bezobiuk</li>
+<li>Alexey Vasiliev</li>
+</ul><h2>License</h2>
+
+<ul>
+<li>Copyright (c) 2012 Railsware (<a href="http://www.railsware.com">www.railsware.com</a>)</li>
+<li><a href="http://www.opensource.org/licenses/MIT">MIT</a></li>
+</ul><h2>References</h2>
+
+<ul>
+<li><a href="https://github.com/railsware/libskypekit">libskypekit</a></li>
+<li><a href="http://developer.skype.com/skypekit/reference/cpp/index.html">SkypeKit C++ Wrapper Reference</a></li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/railsware">railsware</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
