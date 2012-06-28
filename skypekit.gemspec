@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "skypekit"
   gem.require_paths = ["lib"]
-  gem.version       = "0.0.1"
+  gem.version       = "0.0.2"
 
   gem.add_runtime_dependency "ffi", ">=1.0.0"
 end
