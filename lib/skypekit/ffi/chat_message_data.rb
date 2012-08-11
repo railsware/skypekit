@@ -10,7 +10,7 @@ module Skypekit
         :author, :string,
         :author_displayname, :string,
         :body_xml, :string,
-        :timestamp, :time_t,
+        :timestamp, :uint,
         :payload, :pointer
         
       def convo_id
