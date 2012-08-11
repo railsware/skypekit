@@ -15,4 +15,5 @@ Gem::Specification.new do |gem|
   gem.version       = "0.0.2"
 
   gem.add_runtime_dependency "ffi", ">=1.0.0"
+  gem.add_development_dependency 'rake'
 end
